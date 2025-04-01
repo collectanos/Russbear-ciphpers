@@ -4,14 +4,20 @@
 #include <bitset>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 std::string FourF::stringToBinary(const std::string& input)
 {
     std::string binaryString;
     for (unsigned char c : input)
     {
+        if (c > 127)
+        {
+            throw std::invalid_argument("Input contains non-ASCII characters.");
+        }
         binaryString += std::bitset<8>(c).to_string();
     }
+    std::cout << "Binary: " << binaryString << std::endl;
     return binaryString;
 }
 
@@ -33,6 +39,7 @@ std::string FourF::binaryToString(const std::string& binary)
         char c = static_cast<char>(std::bitset<8>(byte).to_ulong());
         result += c;
     }
+    std::cout << "Decoded Text: " << result << std::endl;
     return result;
 }
 
@@ -67,7 +74,7 @@ std::string FourF::hexToBase36(const std::string& hex)
 
         base36Result += base36Chunk;
     }
-
+    std::cout << "Base36: " << base36Result << std::endl;
     return base36Result;
 }
 
@@ -94,12 +101,18 @@ std::string FourF::base36ToHex(const std::string& base36)
         hex = std::string(1, hexChar) + hex;
         decimal /= 16;
     }
+    while (hex.length() % 2 != 0)
+    {
+        hex = "0" + hex;
+    }
+    std::cout << "Hex from Base36: " << hex << std::endl;
     return hex;
 }
 
 std::string FourF::encryptWithSuffix(const std::string& input)
 {
     std::string binaryString = stringToBinary(input);
+    size_t originalLength = binaryString.length();
 
     while (binaryString.length() % 4 != 0)
     {
@@ -124,6 +137,7 @@ std::string FourF::encryptWithSuffix(const std::string& input)
         char hexChar = (value < 10) ? ('0' + value) : ('A' + value - 10);
         hexResult += hexChar;
     }
+    std::cout << "Hex: " << hexResult << std::endl;
 
     std::string compressedResult = hexToBase36(hexResult);
 
@@ -160,31 +174,45 @@ std::string FourF::encryptWithSuffix(const std::string& input)
     {
         suffix += '=';
     }
+    std::cout << "Suffix: " << suffix << std::endl;
 
-    return compressedResult + suffix;
+    return compressedResult + suffix + "|" + std::to_string(originalLength);
 }
 
 std::string FourF::decrypt(const std::string& input)
 {
-    size_t suffixStart = input.length() - 2;
-    std::string base36Input = input.substr(0, suffixStart);
-    std::string suffix = input.substr(suffixStart);
+    size_t delimiterPos = input.find('|');
+    if (delimiterPos == std::string::npos)
+    {
+        throw std::invalid_argument("Invalid encrypted format: missing length delimiter.");
+    }
 
+    std::string base36Input = input.substr(0, delimiterPos);
+    std::string lengthStr = input.substr(delimiterPos + 1);
+    size_t originalLength = std::stoi(lengthStr);
+
+    size_t suffixStart = base36Input.length() - 2;
+    std::string suffix = base36Input.substr(suffixStart);
     suffix.erase(std::remove(suffix.begin(), suffix.end(), '='), suffix.end());
 
     std::string hexInput = base36ToHex(base36Input);
 
     std::string binaryString;
-    for (char c : hexInput)
+    for (size_t i = 0; i < hexInput.length(); i += 2)
     {
-        int value = std::isdigit(c) ? (c - '0') : (std::toupper(c) - 'A' + 10);
-        binaryString += std::bitset<4>(value).to_string();
-    }
+        std::string twoChars = hexInput.substr(i, 2);
+        unsigned long value = 0;
 
-    while (!binaryString.empty() && (binaryString.back() == '+' || binaryString.back() == '-'))
-    {
-        binaryString.pop_back();
+        for (char c : twoChars)
+        {
+            value = value * 16 + (std::isdigit(c) ? (c - '0') : (std::toupper(c) - 'A' + 10));
+        }
+
+        binaryString += std::bitset<8>(value).to_string();
     }
+    std::cout << "Binary from Hex: " << binaryString << std::endl;
+
+    binaryString = binaryString.substr(0, originalLength);
 
     std::string result = binaryToString(binaryString);
 
