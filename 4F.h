@@ -7,7 +7,7 @@ class FourF
 {
 public:
     static std::string stringToBinary(const std::string& input);
-    static std::string encrypt(const std::string& binaryString);
+    static std::string encryptWithSuffix(const std::string& input);
 };
 
 #endif
