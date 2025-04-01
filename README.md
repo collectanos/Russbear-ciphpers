@@ -2,10 +2,10 @@
 
 ## 4F Cipher
 
-The **4F cipher** is a basic encryption method that transforms text into hexadecimal symbols. The algorithm follows these steps:
+The **4F cipher** is a basic encryption method that transforms text into hexadecimal symbols. The algorithm supports Unicode (UTF-8) and follows these steps:
 
 1. **Binary Conversion**:  
-   Each character in the input string is converted into its binary representation based on its ASCII value.
+   Each character in the input string, including Unicode characters, is converted into its binary representation. Each byte of the character is transformed into an 8-bit binary number.
 
 2. **Binary Grouping**:  
    The resulting binary sequence is divided into blocks of 4 bits each. If necessary, leading zeros are added for padding to ensure all blocks are complete.
@@ -19,4 +19,4 @@ The **4F cipher** is a basic encryption method that transforms text into hexadec
    - If the number of digits exceeds the number of letters, the suffix `--` is added.
    - If the number of letters and digits is equal, the suffix `+-` is added.
 
-The **4F cipher** is designed for simplicity and serves as a foundation for exploring more complex encryption techniques.
+The **4F cipher** supports Unicode and is designed for simplicity, serving as a foundation for exploring more complex encryption techniques.
