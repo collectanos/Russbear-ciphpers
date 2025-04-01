@@ -3,6 +3,7 @@
 #include <cctype>
 #include <bitset>
 #include <algorithm>
+#include <cmath>
 
 std::string FourF::stringToBinary(const std::string& input)
 {
@@ -26,31 +27,78 @@ std::string FourF::binaryToString(const std::string& binary)
     return result;
 }
 
+std::string FourF::hexToBase36(const std::string& hex)
+{
+    unsigned long long decimal = 0;
+    for (char c : hex)
+    {
+        decimal = decimal * 16 + (std::isdigit(c) ? (c - '0') : (std::toupper(c) - 'A' + 10));
+    }
+
+    const std::string base36Chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    std::string base36;
+    if (decimal == 0)
+    {
+        return "0";
+    }
+    while (decimal > 0)
+    {
+        base36 = base36Chars[decimal % 36] + base36;
+        decimal /= 36;
+    }
+    return base36;
+}
+
+std::string FourF::base36ToHex(const std::string& base36)
+{
+    const std::string base36Chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    unsigned long long decimal = 0;
+    for (char c : base36)
+    {
+        size_t index = base36Chars.find(std::toupper(c));
+        decimal = decimal * 36 + index;
+    }
+
+    std::string hex;
+    if (decimal == 0)
+    {
+        return "0";
+    }
+    while (decimal > 0)
+    {
+        int remainder = decimal % 16;
+        char hexChar = (remainder < 10) ? ('0' + remainder) : ('A' + remainder - 10);
+        hex = std::string(1, hexChar) + hex;
+        decimal /= 16;
+    }
+    return hex;
+}
+
 std::string FourF::encryptWithSuffix(const std::string& input)
 {
-    std::unordered_map<std::string, char> mapping =
-    {
-        {"0000", '0'}, {"0001", '1'}, {"0010", '2'}, {"0011", '3'},
-        {"0100", '4'}, {"0101", '5'}, {"0110", '6'}, {"0111", '7'},
-        {"1000", '8'}, {"1001", '9'}, {"1010", 'A'}, {"1011", 'B'},
-        {"1100", 'C'}, {"1101", 'D'}, {"1110", 'E'}, {"1111", 'F'}
-    };
-
+    // Step 1: Convert input to binary
     std::string binaryString = stringToBinary(input);
-    std::string paddedBinary = binaryString;
 
-    while (paddedBinary.length() % 4 != 0)
+    // Step 2: Pad binary string to make its length divisible by 4
+    while (binaryString.length() % 4 != 0)
     {
-        paddedBinary = '0' + paddedBinary;
+        binaryString = '0' + binaryString;
     }
 
-    std::string result;
-    for (size_t i = 0; i < paddedBinary.length(); i += 4)
+    // Step 3: Convert binary to hexadecimal
+    std::string hexResult;
+    for (size_t i = 0; i < binaryString.length(); i += 4)
     {
-        std::string fourBits = paddedBinary.substr(i, 4);
-        result += mapping[fourBits];
+        std::string fourBits = binaryString.substr(i, 4);
+        unsigned long value = std::bitset<4>(fourBits).to_ulong();
+        char hexChar = (value < 10) ? ('0' + value) : ('A' + value - 10);
+        hexResult += hexChar;
     }
 
+    // Step 4: Compress hexadecimal to base-36
+    std::string compressedResult = hexToBase36(hexResult);
+
+    // Step 5: Add suffix based on letter/digit analysis
     int letterCount = 0;
     int digitCount = 0;
 
@@ -58,35 +106,40 @@ std::string FourF::encryptWithSuffix(const std::string& input)
     {
         if (std::isalpha(c))
         {
-            letterCount++;
+            ++letterCount;
         }
         else if (std::isdigit(c))
         {
-            digitCount++;
+            ++digitCount;
         }
     }
 
+    std::string suffix;
     if (letterCount > digitCount)
     {
-        result += "++";
+        suffix = "++";
     }
     else if (digitCount > letterCount)
     {
-        result += "--";
+        suffix = "--";
     }
     else
     {
-        result += "+-";
+        suffix = "+-";
     }
 
-    return result;
+    return compressedResult + suffix;
 }
 
 std::string FourF::decrypt(const std::string& input)
 {
-    std::string hexInput = input.substr(0, input.length() - 2);
-    std::string suffix = input.substr(input.length() - 2);
+    // Step 1: Separate base-36 input and suffix
+    std::string base36Input = input.substr(0, input.length() - 2);
 
+    // Step 2: Convert base-36 back to hexadecimal
+    std::string hexInput = base36ToHex(base36Input);
+
+    // Step 3: Convert hexadecimal to binary
     std::string binaryString;
     for (char c : hexInput)
     {
@@ -94,6 +147,7 @@ std::string FourF::decrypt(const std::string& input)
         binaryString += std::bitset<4>(value).to_string();
     }
 
+    // Step 4: Convert binary back to original text
     std::string result = binaryToString(binaryString);
 
     return result;
