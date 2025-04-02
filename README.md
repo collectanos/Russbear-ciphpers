@@ -1,15 +1,17 @@
-# Russbear-ciphers
+# Cipher Tool: 4F
 
-## 4F Cipher
+This tool provides encryption functionality using a custom cipher algorithm. The encryption process is designed to be irreversible, making it similar to a hash function. It supports Unicode characters and does not include decryption functionality.
 
-The **4F cipher** is a simple encryption algorithm that converts text into a compact format using binary, hexadecimal, and base-36 encoding. This implementation supports only **ASCII characters** (values 0–127).
+## How It Works
 
-### How It Works
-1. Converts input text into binary (8 bits per character).
-2. Groups binary data into 4-bit blocks and maps them to hexadecimal (`0`–`F`).
-3. Compresses the hexadecimal output into base-36 (`0`–`9`, `A`–`Z`).
-4. Adds a suffix (`++`, `--`, or `+-`) based on the number of letters and digits in the input.
-5. Uses `=` symbols in the suffix for padding if necessary.
+1. **Binary Conversion**:
+   - Each character in the input string is converted into its 8-bit binary representation.
 
-### Limitations
-- The algorithm supports only **ASCII characters**. Input containing non-ASCII characters (e.g., Cyrillic, emojis, etc.) will result in an error.
+2. **Hexadecimal Conversion**:
+   - The binary string is grouped into 4-bit chunks and converted into hexadecimal.
+
+3. **Base36 Compression**:
+   - The hexadecimal string is further compressed into Base36 format for compactness.
+
+4. **Suffix Addition**:
+   - A suffix (`++`, `--`, or `+-`) is added based on the ratio of letters to digits in the input string.
