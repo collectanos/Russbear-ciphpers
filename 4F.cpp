@@ -16,10 +16,10 @@ std::string FourF::stringToBinary(const std::string& input, bool verbose)
     return binaryString;
 }
 
-std::string FourF::hexToBase35(const std::string& hex, bool verbose)
+std::string FourF::hexToBase36(const std::string& hex, bool verbose)
 {
-    const std::string base35Chars = "0123456789ABCDEFGHJKLMNPQRSTUVWXY";
-    std::string base35Result;
+    const std::string base36Chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    std::string base36Result;
 
     for (size_t i = 0; i < hex.length(); i += 4)
     {
@@ -31,24 +31,24 @@ std::string FourF::hexToBase35(const std::string& hex, bool verbose)
             decimal = decimal * 16 + (std::isdigit(c) ? (c - '0') : (std::toupper(c) - 'A' + 10));
         }
 
-        std::string base35Chunk;
+        std::string base36Chunk;
         if (decimal == 0)
         {
-            base35Chunk = "0";
+            base36Chunk = "0";
         }
         else
         {
             while (decimal > 0)
             {
-                base35Chunk = base35Chars[decimal % 35] + base35Chunk;
-                decimal /= 35;
+                base36Chunk = base36Chars[decimal % 36] + base36Chunk;
+                decimal /= 36;
             }
         }
 
-        base35Result += base35Chunk;
+        base36Result += base36Chunk;
     }
-    if (verbose) std::cout << "Base35: " << base35Result << std::endl;
-    return base35Result;
+    if (verbose) std::cout << "Base36: " << base36Result << std::endl;
+    return base36Result;
 }
 
 std::string FourF::encryptWithSuffix(const std::string& input, bool verbose)
@@ -75,7 +75,7 @@ std::string FourF::encryptWithSuffix(const std::string& input, bool verbose)
     }
     if (verbose) std::cout << "Hex: " << hexResult << std::endl;
 
-    std::string compressedResult = hexToBase35(hexResult, verbose);
+    std::string compressedResult = hexToBase36(hexResult, verbose);
 
     int letterCount = 0;
     int digitCount = 0;
