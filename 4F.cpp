@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <algorithm>
 #include <cmath>
+#include <iomanip>
 
 std::string FourF::stringToBinary(const std::string& input, bool verbose)
 {
@@ -61,15 +62,29 @@ std::string FourF::compressBase36(const std::string& base36, bool verbose)
         size_t groupSize = (i + 3 <= base36.length()) ? 3 : (i + 2 <= base36.length()) ? 2 : 1;
         std::string group = base36.substr(i, groupSize);
 
-        unsigned long long decimalValue = 0;
+        int sum = 0;
         for (char c : group)
         {
-            decimalValue = decimalValue * 36 + (std::isdigit(c) ? (c - '0') : (std::toupper(c) - 'A' + 10));
+            sum += std::isdigit(c) ? (c - '0') : (std::toupper(c) - 'A' + 10);
         }
 
-        decimalValue /= 4;
-        compressedResult += static_cast<char>(decimalValue % 256);
+        if (verbose) std::cout << "Group: " << group << ", Sum of Digits: " << sum << std::endl;
 
+        char asciiChar = static_cast<char>(sum % 128);
+
+        if (verbose)
+        {
+            if (std::isprint(asciiChar))
+            {
+                std::cout << "Group: " << group << ", ASCII Character: " << asciiChar << std::endl;
+            }
+            else
+            {
+                std::cout << "Group: " << group << ", ASCII Character (Numeric): " << static_cast<int>(asciiChar) << std::endl;
+            }
+        }
+
+        compressedResult += asciiChar;
         i += groupSize;
     }
 
