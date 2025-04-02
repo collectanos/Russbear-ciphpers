@@ -10,6 +10,7 @@ public:
 private:
     static std::string stringToBinary(const std::string& input, bool verbose);
     static std::string hexToBase36(const std::string& hex, bool verbose);
+    static std::string compressBase36(const std::string& base36, bool verbose);
 };
 
 #endif

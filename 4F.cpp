@@ -51,6 +51,32 @@ std::string FourF::hexToBase36(const std::string& hex, bool verbose)
     return base36Result;
 }
 
+std::string FourF::compressBase36(const std::string& base36, bool verbose)
+{
+    std::string compressedResult;
+    size_t i = 0;
+
+    while (i < base36.length())
+    {
+        size_t groupSize = (i + 3 <= base36.length()) ? 3 : (i + 2 <= base36.length()) ? 2 : 1;
+        std::string group = base36.substr(i, groupSize);
+
+        unsigned long long decimalValue = 0;
+        for (char c : group)
+        {
+            decimalValue = decimalValue * 36 + (std::isdigit(c) ? (c - '0') : (std::toupper(c) - 'A' + 10));
+        }
+
+        decimalValue /= 4;
+        compressedResult += static_cast<char>(decimalValue % 256);
+
+        i += groupSize;
+    }
+
+    if (verbose) std::cout << "Compressed Result: " << compressedResult << std::endl;
+    return compressedResult;
+}
+
 std::string FourF::encryptWithSuffix(const std::string& input, bool verbose)
 {
     std::string binaryString = stringToBinary(input, verbose);
@@ -75,7 +101,8 @@ std::string FourF::encryptWithSuffix(const std::string& input, bool verbose)
     }
     if (verbose) std::cout << "Hex: " << hexResult << std::endl;
 
-    std::string compressedResult = hexToBase36(hexResult, verbose);
+    std::string base36Result = hexToBase36(hexResult, verbose);
+    std::string compressedResult = compressBase36(base36Result, verbose);
 
     int letterCount = 0;
     int digitCount = 0;
