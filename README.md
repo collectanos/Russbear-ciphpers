@@ -11,7 +11,7 @@ This tool provides encryption functionality using a custom cipher algorithm. The
    - The binary string is grouped into 4-bit chunks and converted into hexadecimal.
 
 3. **Base36 Compression**:
-   - The hexadecimal string is further compressed into Base35 format for compactness.
+   - The hexadecimal string is further compressed into Base36 format for compactness.
 
 4. **Suffix Addition**:
    - A suffix (`++`, `--`, or `+-`) is added based on the ratio of letters to digits in the input string.
